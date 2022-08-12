@@ -22,6 +22,7 @@
 /addOns/**/out
 /testutils/out
 /sharedutils/out
+web-ext-artifacts
 
 # Eclipse
 # -------
