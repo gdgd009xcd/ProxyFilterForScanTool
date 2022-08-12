@@ -1,0 +1,33 @@
+{
+
+  "manifest_version": 2,
+  "name": "ProxyFilterForScanTool",
+  "description": "bypass proxing javascript/css content",
+  "version": "0.2",
+
+  "icons": {
+    "48": "icons/proxyfilter.svg",
+    "96": "icons/proxyfilter.svg"
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "strict_min_version": "91.1.0",
+      "id": "patsz.g1owq@gmail.com"
+    }
+  },
+
+  "background": {
+    "scripts": [
+      "background/proxy-handler.js"
+    ]
+  },
+
+  "options_ui": {
+    "page": "options/options.html",
+    "browser_style": true
+  },
+
+  "permissions": ["proxy", "storage", "notifications","<all_urls>"]
+
+}
