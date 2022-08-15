@@ -1,7 +1,27 @@
 // Initialize the option items with default value.
 let scanTargetHosts = ["somethingexample1.com", "somethingexample2.com"];
-let noProxyHosts = ["www.google-analytics.com", "ocsp.digicert.com", "ocsp.pki.goog", "analytics.twitter.com", "safebrowsing.googleapis.com"];
-let noProxyHostsPartial = [".mozilla.com", ".firefox.com", ".mozilla.net", ".mozilla.org", ".doubleclick.net", ".lencr.org"];
+let noProxyHosts = [
+    "www.google-analytics.com",
+    "ocsp.digicert.com",
+    "ocsp.pki.goog",
+    "analytics.twitter.com",
+    "safebrowsing.googleapis.com",
+    "ssl.gstatic.com",
+    "adservice.google.com",
+    "adservice.google.co.jp",
+    "ogs.google.co.jp",
+    "play.google.com"
+];
+
+let noProxyHostsPartial = [
+    ".mozilla.com",
+    ".firefox.com",
+    ".mozilla.net",
+    ".mozilla.org",
+    ".doubleclick.net",
+    ".lencr.org"
+];
+
 let proxyHost = "127.0.0.1";
 let proxyPort = 8040;
 
