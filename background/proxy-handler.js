@@ -1,3 +1,5 @@
+
+
 // Initialize the option items with default value.
 let scanTargetHosts = ["somethingexample1.com", "somethingexample2.com"];
 let noProxyHosts = [
@@ -25,7 +27,12 @@ let noProxyHostsPartial = [
 let proxyHost = "127.0.0.1";
 let proxyPort = 8040;
 
+let exceptAllNoProxy = {
+    checked: false
+};
+
 function onGot(item) {
+console.log("start onGot..");
     let isStorageExist = false;
     if (item.proxyHost) {
         proxyHost = item.proxyHost;
@@ -47,6 +54,10 @@ function onGot(item) {
         noProxyHostsPartial = item.noProxyHostsPartial;
     }
 
+    if (item.exceptAllNoProxy) {
+        exceptAllNoProxy = JSON.parse(item.exceptAllNoProxy);
+    }
+
     let messagestring = "Initialize scanTargetHosts to default.";
     if (isStorageExist) {
       messagestring = "loaded scanTargetHosts from localStorage";
@@ -56,13 +67,14 @@ function onGot(item) {
         message: messagestring,
         type: 'basic'
       });
-    browser.storage.local.set({
-        scanTargetHosts: scanTargetHosts,
-        noProxyHosts: noProxyHosts,
-        noProxyHostsPartial: noProxyHostsPartial,
-        proxyHost: proxyHost,
-        proxyPort: proxyPort
-    });
+
+    storeArgsToStorage(scanTargetHosts,
+                           noProxyHosts,
+                           noProxyHostsPartial,
+                           proxyHost,
+                           proxyPort,
+                           exceptAllNoProxy);
+console.log("end onGot..");
 }
 
 function onError(error) {
@@ -78,6 +90,7 @@ browser.runtime.onInstalled.addListener(details => {
 
 // Get the stored items.
 browser.storage.local.get(data => {
+console.log("start storage get.");
   if (data.scanTargetHosts) {
     scanTargetHosts = data.scanTargetHosts;
   }
@@ -97,6 +110,10 @@ browser.storage.local.get(data => {
   if (data.proxyPort) {
     proxyPort = data.proxyPort;
   }
+  if (data.exceptAllNoProxy) {
+    exceptAllNoProxy = JSON.parse(data.exceptAllNoProxy);
+  }
+  console.log("end storage get.");
 });
 
 // Listen for changes in the stored items
@@ -147,6 +164,10 @@ browser.storage.onChanged.addListener(changeData => {
             console.log("changed Storage proxyPort[" + proxyPort + "]");
         }
     }
+    if (changeData.exceptAllNoProxy) {
+        exceptAllNoProxy = JSON.parse(changeData.exceptAllNoProxy.newValue);
+        console.log("changed Storage exceptAllNoProxy[" + exceptAllNoProxy.checked + "]");
+    }
 });
 
 // Managed the proxy
@@ -157,6 +178,9 @@ browser.proxy.onRequest.addListener(handleProxyRequest, {urls: ["<all_urls>"]});
 function isNoProxyHost(hostname) {
     if (noProxyHosts.indexOf(hostname) != -1) {
         console.log("Matched noProxyHost hostname[" + hostname + "]");
+        return true;
+    }
+    if (exceptAllNoProxy.checked) {
         return true;
     }
     let hostParts = hostname.split(".");
@@ -207,6 +231,21 @@ browser.proxy.onError.addListener(error => {
   console.error(`Proxy error: ${error.message}`);
 });
 
-
+function storeArgsToStorage(scanTargetHosts,
+    noProxyHosts,
+    noProxyHostsPartial,
+    proxyHost,
+    proxyPort,
+    exceptAllNoProxy) {
+    let exceptAllNoProxyString = JSON.stringify(exceptAllNoProxy);
+    browser.storage.local.set({
+        scanTargetHosts: scanTargetHosts,
+        noProxyHosts: noProxyHosts,
+        noProxyHostsPartial: noProxyHostsPartial,
+        proxyHost: proxyHost,
+        proxyPort: proxyPort,
+        exceptAllNoProxy: exceptAllNoProxyString
+    });
+}
 
 
