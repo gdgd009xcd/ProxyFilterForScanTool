@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "name": "ProxyFilterForScanTool",
   "description": "bypass proxing javascript/css content",
-  "version": "0.9",
+  "version": "0.91",
 
   "icons": {
     "48": "icons/proxyfilter.svg",
@@ -22,6 +22,10 @@
       "background/proxy-handler.js"
     ]
   },
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
 
   "options_ui": {
     "page": "options/options.html"
