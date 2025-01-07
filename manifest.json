@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "name": "ProxyFilterForScanTool",
   "description": "bypass proxing javascript/css content",
-  "version": "0.91",
+  "version": "0.92",
 
   "icons": {
     "48": "icons/proxyfilter.svg",
@@ -12,7 +12,7 @@
 
   "browser_specific_settings": {
     "gecko": {
-      "strict_min_version": "91.1.0",
+      "strict_min_version": "109.0",
       "id": "patsz.g1owq@gmail.com"
     }
   },
