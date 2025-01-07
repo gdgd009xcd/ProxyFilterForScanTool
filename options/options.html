@@ -9,12 +9,22 @@
   <body>
 
     <section>
-      <span class="title">List of domains to proxy:</span>
-      <textarea id="scan-target-hosts" rows="10" cols="50"></textarea>
-      <span class="titleB">No Proxy domains |<input type="checkbox" id="except-all-noproxy" value="ExceptAllNoProxy">Except above all No Proxy</span><p></p>
+        <span class="title">List of domains to proxy <br> <input type="checkbox" id="except-no-proxy-media" value="ExceptNoProxyMedia">Except if mediaType matched No Proxy MediaType </span><br>
+      <textarea id="scan-target-hosts" rows="10" cols="50"></textarea><p></p>
+      <span class="titleB">No Proxy domains |<input type="checkbox" id="except-all-noproxy" value="ExceptAllNoProxy">Except above all No Proxy</span><br>
       <textarea id="no-proxy-hosts" rows="10" cols="50"></textarea><p></p>
       <label>proxyhost:<input type="text" id="proxyhost" ></label>
-      <label>proxyport:<input type="text" size=5 id="proxyport" ></label>
+      <label>proxyport:<input type="text" size=5 id="proxyport" ></label><p></p>
+      <span class="title">No Proxy MediaType:</span><br>
+      <textarea id="no-proxy-media" rows="5" cols="50"></textarea><p></p>
+      <span class="title">* import option settings from file</span><br>
+      <input type="file" id="importStorage" />
+
+      <br><br>
+      <span class="title">* export option settings to file</span><br>
+      <button id="exportStorage">export</button><p></p>
+      <span class="title">* restore option settings to factory defaults</span><br>
+      <button id="resetDefault">reset settings to default</button>
     </section>
 
     <script src="options.js"></script>

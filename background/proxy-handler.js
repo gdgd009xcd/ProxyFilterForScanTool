@@ -24,6 +24,11 @@ let noProxyHostsPartial = [
     ".lencr.org"
 ];
 
+let noProxyMedia = [
+    "stylesheet",
+    "script"
+];
+
 let proxyHost = "127.0.0.1";
 let proxyPort = 8040;
 
@@ -31,8 +36,12 @@ let exceptAllNoProxy = {
     checked: false
 };
 
+let exceptNoProxyMedia = {
+    checked: false
+};
+
 function onGot(item) {
-console.log("start onGot..");
+    console.log("start onGot..");
     let isStorageExist = false;
     if (item.proxyHost) {
         proxyHost = item.proxyHost;
@@ -53,10 +62,18 @@ console.log("start onGot..");
     if (item.noProxyHostsPartial) {
         noProxyHostsPartial = item.noProxyHostsPartial;
     }
+    if (item.noProxyMedia) {
+        noProxyMedia = item.noProxyMedia;
+    }
 
     if (item.exceptAllNoProxy) {
         exceptAllNoProxy = JSON.parse(item.exceptAllNoProxy);
     }
+
+    if (item.exceptNoProxyMedia) {
+        exceptNoProxyMedia = JSON.parse(item.exceptNoProxyMedia);
+    }
+
 
     let messagestring = "Initialize scanTargetHosts to default.";
     if (isStorageExist) {
@@ -69,16 +86,18 @@ console.log("start onGot..");
       });
 
     storeArgsToStorage(scanTargetHosts,
-                           noProxyHosts,
-                           noProxyHostsPartial,
-                           proxyHost,
-                           proxyPort,
-                           exceptAllNoProxy);
-console.log("end onGot..");
+        noProxyHosts,
+        noProxyHostsPartial,
+        proxyHost,
+        proxyPort,
+        exceptAllNoProxy,
+        noProxyMedia,
+        exceptNoProxyMedia);
+    console.log("end onGot..");
 }
 
 function onError(error) {
-  console.log(`OnError: ${error}`);
+    console.log(`OnError: ${error}`);
 }
 
 // Set the default list on installation.
@@ -90,37 +109,44 @@ browser.runtime.onInstalled.addListener(details => {
 
 // Get the stored items.
 browser.storage.local.get(data => {
-console.log("start storage get.");
-  if (data.scanTargetHosts) {
-    scanTargetHosts = data.scanTargetHosts;
-  }
+    console.log("start storage get.");
+    if (data.scanTargetHosts) {
+        scanTargetHosts = data.scanTargetHosts;
+    }
 
-  if (data.noProxyHosts) {
-    noProxyHosts = data.noProxyHosts;
-  }
+    if (data.noProxyMedia) {
+        noProxyMedia = data.noProxyMedia;
+    }
 
-  if (data.noProxyHostsPartial) {
-    noProxyHostsPartial = data.noProxyHostsPartial;
-  }
+    if (data.noProxyHosts) {
+      noProxyHosts = data.noProxyHosts;
+    }
 
-  if (data.proxyHost) {
-    proxyHost = data.proxyHost;
-  }
+    if (data.noProxyHostsPartial) {
+      noProxyHostsPartial = data.noProxyHostsPartial;
+    }
 
-  if (data.proxyPort) {
-    proxyPort = data.proxyPort;
-  }
-  if (data.exceptAllNoProxy) {
-    exceptAllNoProxy = JSON.parse(data.exceptAllNoProxy);
-  }
-  console.log("end storage get.");
+    if (data.proxyHost) {
+      proxyHost = data.proxyHost;
+    }
+
+    if (data.proxyPort) {
+      proxyPort = data.proxyPort;
+    }
+    if (data.exceptAllNoProxy) {
+      exceptAllNoProxy = JSON.parse(data.exceptAllNoProxy);
+    }
+    if (data.exceptNoProxyMedia) {
+      exceptNoProxyMedia = JSON.parse(data.exceptNoProxyMedia);
+    }
+    console.log("end storage get.");
 });
 
 // Listen for changes in the stored items
 browser.storage.onChanged.addListener(changeData => {
     if (changeData.scanTargetHosts) {
         scanTargetHosts = changeData.scanTargetHosts.newValue;
-        if (scanTargetHosts.length !== 0) {
+        if (typeof(scanTargetHosts) !== "undefined" && scanTargetHosts.length !== 0) {
             console.log("changed Storage scanTargetHosts.length=" + scanTargetHosts.length);
             scanTargetHosts.forEach(
                 host => {
@@ -128,7 +154,21 @@ browser.storage.onChanged.addListener(changeData => {
                 }
             );
         } else {
-            console.log("changed Storage scanTargetHosts = [] length=" + scanTargetHosts.length );
+            console.log("changed Storage scanTargetHosts = [] or undefined");
+            return;
+        }
+    }
+    if (changeData.noProxyMedia) {
+        noProxyMedia = changeData.noProxyMedia.newValue;
+        if (noProxyMedia.length !== 0) {
+            console.log("changed Storage noProxyMedia.length=" + noProxyMedia.length);
+            noProxyMedia.forEach(
+                media => {
+                    console.log("noProxyMedia[" + media + "]");
+                }
+            );
+        } else {
+            console.log("changed Storage noProxyMedia = [] length=" + noProxyMedia.length );
         }
     }
     if (changeData.noProxyHosts) {
@@ -168,6 +208,11 @@ browser.storage.onChanged.addListener(changeData => {
         exceptAllNoProxy = JSON.parse(changeData.exceptAllNoProxy.newValue);
         console.log("changed Storage exceptAllNoProxy[" + exceptAllNoProxy.checked + "]");
     }
+    if (changeData.exceptNoProxyMedia) {
+        exceptNoProxyMedia = JSON.parse(changeData.exceptNoProxyMedia.newValue);
+        console.log("changed Storage exceptNoProxyMedia[" + exceptNoProxyMedia.checked + "]");
+    }
+
 });
 
 // Managed the proxy
@@ -202,28 +247,29 @@ function isNoProxyHost(hostname) {
 
 // On the request to open a webpage
 function handleProxyRequest(requestInfo) {
-// Read the web address of the page to be visited 
-  const url = new URL(requestInfo.url);
+    // Read the web address of the page to be visited 
+    const url = new URL(requestInfo.url);
 
-   let resType = requestInfo.type + "";
-   let isScript = resType === 'script';
+    let resType = requestInfo.type + "";
+    let isScript = resType === 'script';
 
-
-
-
-  if (scanTargetHosts.indexOf(url.hostname) != -1) {
-    console.log(`Proxying: ${url.hostname}` + " type[" + resType + "]");
-    return {type: "http", host: proxyHost, port: proxyPort};
-  } else  if (scanTargetHosts.length > 0
-    && resType !== 'script'
-    && resType !== 'stylesheet'
-    && !isNoProxyHost(url.hostname)) {
+    if (scanTargetHosts.indexOf(url.hostname) != -1) {
+        if (!exceptNoProxyMedia.checked
+            || (exceptNoProxyMedia.checked 
+                && noProxyMedia.indexOf(resType) == -1)
+            ) {
+            console.log(`Proxying: ${url.hostname}` + " type[" + resType + "]");
+            return {type: "http", host: proxyHost, port: proxyPort};
+        }
+    } else  if (scanTargetHosts.length > 0
+      && noProxyMedia.indexOf(resType) == -1
+      && !isNoProxyHost(url.hostname)) {
         console.log(`Proxying: ${url.hostname}` + " type[" + resType + "]");
         return {type: "http", host: proxyHost, port: proxyPort};
-  }
-  console.log("Direct requestURL:" + requestInfo.url +  " type[" + resType + "]");
-  // Return instructions to open the requested webpage
-  return {type: "direct"};
+    }
+    console.log("Direct requestURL:" + requestInfo.url +  " type[" + resType + "]");
+    // Return instructions to open the requested webpage
+    return {type: "direct"};
 }
 
 // Log any errors from the proxy script
@@ -236,15 +282,20 @@ function storeArgsToStorage(scanTargetHosts,
     noProxyHostsPartial,
     proxyHost,
     proxyPort,
-    exceptAllNoProxy) {
+    exceptAllNoProxy,
+    noProxyMedia,
+    exceptNoProxyMedia) {
     let exceptAllNoProxyString = JSON.stringify(exceptAllNoProxy);
+    let exceptNoProxyMediaString = JSON.stringify(exceptNoProxyMedia);
     browser.storage.local.set({
         scanTargetHosts: scanTargetHosts,
         noProxyHosts: noProxyHosts,
         noProxyHostsPartial: noProxyHostsPartial,
         proxyHost: proxyHost,
         proxyPort: proxyPort,
-        exceptAllNoProxy: exceptAllNoProxyString
+        exceptAllNoProxy: exceptAllNoProxyString,
+        noProxyMedia: noProxyMedia,
+        exceptNoProxyMedia: exceptNoProxyMediaString
     });
 }
 
