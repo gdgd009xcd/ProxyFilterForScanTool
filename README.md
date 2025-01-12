@@ -4,9 +4,13 @@
 When you browsing web sites through proxy, you may browser contents sometimes looks broken or hang tight
 because contents consists of javascript/css based such as Angular or  they consists of movie streams.
 This is because access through proxy invoke communication timeout or hang tight.
-This extension allows you to directly access content that does not need to be accessed via a proxy, depending on the conditions you set in several options.
-This extension uses the proxy API listener `onRequest` to listen for requests to visit a web page,
+This addon allows you to directly access content that does not need to be accessed via a proxy, depending on the conditions you set in several options.
+This addon uses the proxy API listener `onRequest` to listen for requests to visit a web page,
 
+## Disclaimer
+
+This addon uses the proxy API listener `onRequest`, so if you use other addons which use same `onRequest` listener, 
+you may encounter problems which may not work as you think. This addon's main usecase is for detecting website vulnerabilities through proxy.
 
 ## how to use
 
@@ -50,9 +54,9 @@ and click [...] and select preference menu item.
     This type is webRequest.ResourceType.<br>
     The type of resource being requested: for example, "image", "script", or "stylesheet".<br>
   * The PrimeHeader Regex for no proxy access:<br>
-    if request's primeheader matches this regex, then request will be send host directly.
-    The primeHeader consists of HttpMethod and URL
-    HttpMethod:POST/GET/PUT/HEAD ...etc.
+    if request's primeheader matches this regex, then request will be send host directly.<br>
+    The primeHeader consists of HttpMethod and URL<br>
+    HttpMethod:POST/GET/PUT/HEAD ...etc.<br>
     Regex example: POST http://somewhere.com.*
 
 * Option Settings Management
