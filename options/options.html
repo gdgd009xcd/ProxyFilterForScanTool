@@ -3,28 +3,49 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <title>Option Setting Page</title>
     <link rel="stylesheet" href="options.css"/>
   </head>
 
   <body>
 
     <section>
-        <span class="title">List of domains to proxy <br> <input type="checkbox" id="except-no-proxy-media" value="ExceptNoProxyMedia">Except if mediaType matched No Proxy MediaType </span><br>
-      <textarea id="scan-target-hosts" rows="10" cols="50"></textarea><p></p>
-      <span class="titleB">No Proxy domains |<input type="checkbox" id="except-all-noproxy" value="ExceptAllNoProxy">Except above all No Proxy</span><br>
+      <h1>Proxy settings</h1>
+      <div class="rectangle normalmargin">
+        <span class="title">List of domains to proxy:</span><br>
+      <textarea id="scan-target-hosts" rows="10" cols="50"></textarea>
+        <input type="checkbox" id="except-no-proxy-media" value="ExceptNoProxyMedia"><span class="title">Except if mediaType matched No Proxy MediaType</span>
+        <p></p>
+      <span class="title">proxyhost:<input type="text" id="proxyhost" >
+        proxyport:<input type="text" size=5 id="proxyport" ></span><p></p>
+      </div>
+
+      <h1>No proxy(Direct Access) settings</h1>
+      <div class="rectangle normalmargin">
+      <span class="title">No Proxy domains |<input type="checkbox" id="except-all-noproxy" value="ExceptAllNoProxy">Except above all No Proxy</span><br>
       <textarea id="no-proxy-hosts" rows="10" cols="50"></textarea><p></p>
-      <label>proxyhost:<input type="text" id="proxyhost" ></label>
-      <label>proxyport:<input type="text" size=5 id="proxyport" ></label><p></p>
+
       <span class="title">No Proxy MediaType:</span><br>
       <textarea id="no-proxy-media" rows="5" cols="50"></textarea><p></p>
-      <span class="title">* import option settings from file</span><br>
-      <input type="file" id="importStorage" />
 
-      <br><br>
-      <span class="title">* export option settings to file</span><br>
+
+
+        <span class="title">The PrimeHeader Regex for no proxy|<input type="checkbox" id="no-proxy-url-regex-casesensitive" value="CaseSensitive">Case Sensitive<br><input type="text" id="no-proxy-url-regex" ></span><br>
+        <p></p><div class="annotation"> * The primeHeader consists of HttpMethod and URL<br>
+        HttpMethod:POST/GET/PUT/HEAD ...etc.<br>
+        Regex example: POST http://somewhere.com.*</div>
+      <br><br></div>
+
+      <h1>Option Setting Management</h1>
+      <div class="rectangle bottommargin">
+
+      <span class="title">Import option settings from file:</span><br>
+      <input type="file" id="importStorage" /><p></p>
+      <span class="title">Export option settings to file:</span><br>
       <button id="exportStorage">export</button><p></p>
-      <span class="title">* restore option settings to factory defaults</span><br>
-      <button id="resetDefault">reset settings to default</button>
+      <span class="title">Restore option settings to factory defaults:</span><br>
+      <button id="resetDefault">restore settings to default</button><p></p></div>
+      <hr>
     </section>
 
     <script src="options.js"></script>

@@ -5,87 +5,50 @@ const exceptAllNoProxyCheckBox = document.querySelector("#except-all-noproxy");
 const proxyPortTextField = document.querySelector("#proxyport");
 const noProxyMediaTextArea = document.querySelector("#no-proxy-media");
 const exceptNoProxyMediaCheckBox = document.querySelector("#except-no-proxy-media");
+const noProxyUrlRegexTextField = document.querySelector("#no-proxy-url-regex");
+const noProxyUrlRegexCaseSensitiveCheckBox = document.querySelector("#no-proxy-url-regex-casesensitive");
 
-//restore defaults.
-const restoreScanTargetHosts = ["somethingexample1.com", "somethingexample2.com"];
-const restoreNoProxyHosts = [
-    "www.google-analytics.com",
-    "ocsp.digicert.com",
-    "ocsp.pki.goog",
-    "analytics.twitter.com",
-    "safebrowsing.googleapis.com",
-    "ssl.gstatic.com",
-    "adservice.google.com",
-    "adservice.google.co.jp",
-    "ogs.google.co.jp",
-    "play.google.com"
-];
-
-const restoreNoProxyHostsPartial = [
-    ".mozilla.com",
-    ".firefox.com",
-    ".mozilla.net",
-    ".mozilla.org",
-    ".doubleclick.net",
-    ".lencr.org"
-];
-
-const restoreNoProxyMedia = [
-    "stylesheet",
-    "script"
-];
-
-const restoreProxyHost = "127.0.0.1";
-const restoreProxyPort = 8040;
-const restoreExceptAllNoProxy = {
-    checked: false
-};
-const restoreExceptNoProxyMedia = {
-    checked: false
+const optionSettings = {
 };
 
 
-let scanTargetHosts = [];
-let noProxyHosts = [];
-let noProxyHostsPartial = [];
-let noProxyMedia = [];
-let proxyHost = "";
-let proxyPort = -1;
-let exceptAllNoProxy = {
-    checked: false
-};
-let exceptNoProxyMedia = {
-    checked: false
-};
 const date = new Date()
 const timeStamp = `${date.getFullYear()}_${date.getMonth() + 1}_${date.getDate()}`
 
 // Store the currently selected settings using browser.storage.local.
 function scanTargetHostsTextAreaChangeHandler() {
   if (scanTargetHostsTextArea.value) {
-    scanTargetHosts = scanTargetHostsTextArea.value.split(/\n+/);
+    optionSettings.scanTargetHosts = scanTargetHostsTextArea.value.split(/\n+/);
   } else {
-    scanTargetHosts = [];
+    optionSettings.scanTargetHosts = [];
   }
 
-  console.log("changed Handler scanTargetHostsTextArea[" + scanTargetHostsTextArea.value + "] scanTargetHosts.length=" + scanTargetHosts.length);
+  console.log(
+    "changed Handler scanTargetHostsTextArea["
+    + scanTargetHostsTextArea.value
+    + "] scanTargetHosts.length="
+    + optionSettings.scanTargetHosts.length
+  );
   storeInputToStorage();
 }
 
 function noProxyMediaTextAreaChangeHandler() {
     if (noProxyMediaTextArea.value) {
-        noProxyMedia = noProxyMediaTextArea.value.split(/\n+/);
+        optionSettings.noProxyMedia = noProxyMediaTextArea.value.split(/\n+/);
     } else {
-        noProxyMedia = [];
+        optionSettings.noProxyMedia = [];
     }
 
-    console.log("changed Handler noProxyMediaTextArea[" + noProxyMediaTextArea.value + "] noProxyMedia.length=" + noProxyMedia.length);
+    console.log("changed Handler noProxyMediaTextArea["
+        + noProxyMediaTextArea.value
+        + "] noProxyMedia.length="
+        + optionSettings.noProxyMedia.length);
     storeInputToStorage();
 }
 
 function noProxyHostsTextAreaChangeHandler() {
-  noProxyHosts = [];
-  noProxyHostsPartial = [];
+  optionSettings.noProxyHosts = [];
+  optionSettings.noProxyHostsPartial = [];
   let noProxyHostsChangedValues = [];
   if (noProxyHostsTextArea.value) {
     noProxyHostsChangedValues = noProxyHostsTextArea.value.split(/\n+/);
@@ -93,9 +56,9 @@ function noProxyHostsTextAreaChangeHandler() {
         noProxyHostsChangedValues.forEach(
             host => {
                 if (host.indexOf(".") === 0) {
-                    noProxyHostsPartial.push(host);
+                    optionSettings.noProxyHostsPartial.push(host);
                 } else {
-                    noProxyHosts.push(host);
+                    optionSettings.noProxyHosts.push(host);
                 }
                 console.log("noProxyPartial[" + host + "]");
             }
@@ -104,21 +67,22 @@ function noProxyHostsTextAreaChangeHandler() {
   }
 
   console.log("changed Handler noProxyHostsTextArea["
-   + noProxyHostsTextArea.value
-   + "] noProxyHosts.length="
-    + noProxyHosts.length
-     + " noProxyHostsPartial.length=" + noProxyHostsPartial.length);
+    + noProxyHostsTextArea.value
+    + "] noProxyHosts.length="
+    + optionSettings.noProxyHosts.length
+    + " noProxyHostsPartial.length="
+    + optionSettings.noProxyHostsPartial.length);
   storeInputToStorage();
 }
 
 function proxyHostTextFieldChangeHandler() {
   if (proxyHostTextField.value) {
-    proxyHost = proxyHostTextField.value;
-    console.log("changed Handler proxyHostTextField[" + proxyHost + "]");
+    optionSettings.proxyHost = proxyHostTextField.value;
+    console.log("changed Handler proxyHostTextField[" + optionSettings.proxyHost + "]");
   }
 
   // always restore TextField value to the valid Storage data.
-  proxyHostTextField.value = proxyHost;
+  proxyHostTextField.value = optionSettings.proxyHost;
   storeInputToStorage();
 }
 
@@ -126,103 +90,139 @@ function proxyPortTextFieldChangeHandler() {
   if (proxyPortTextField.value) {
     let newPortNumber = Number(proxyPortTextField.value);
     if (newPortNumber >= 0 && newPortNumber <= 65535) {
-        proxyPort = newPortNumber;
-        console.log("changed Handler proxyPortTextField[" + proxyPort + "]");
+        optionSettings.proxyPort = newPortNumber;
+        console.log("changed Handler proxyPortTextField[" + optionSettings.proxyPort + "]");
     }
   }
   // always restore TextField value to the valid Storage data.
-  proxyPortTextField.value = proxyPort;
+  proxyPortTextField.value = optionSettings.proxyPort;
   storeInputToStorage();
 }
 
 function exceptAllNoProxyCheckBoxChangeHandler() {
-    exceptAllNoProxy.checked = exceptAllNoProxyCheckBox.checked;
-    console.log("changed Handler exceptAllNoProxy:" + exceptAllNoProxy.checked);
+    optionSettings.exceptAllNoProxy.checked = exceptAllNoProxyCheckBox.checked;
+    console.log("changed Handler exceptAllNoProxy:" + optionSettings.exceptAllNoProxy.checked);
     storeInputToStorage();
 }
 function exceptNoProxyMediaCheckBoxChangeHandler() {
-    exceptNoProxyMedia.checked = exceptNoProxyMediaCheckBox.checked;
-    console.log("changed Handler exceptNoProxyMedia:" + exceptNoProxyMedia.checked);
+    optionSettings.exceptNoProxyMedia.checked = exceptNoProxyMediaCheckBox.checked;
+    console.log("changed Handler exceptNoProxyMedia:" + optionSettings.exceptNoProxyMedia.checked);
     storeInputToStorage();
+}
+
+function noProxyUrlRegexCaseSensitiveCheckBoxChangeHandler() {
+    optionSettings.noProxyUrlRegexFlg = optionSettings.noProxyUrlRegexFlg.replaceAll("i", "");// remove i flag
+    if (!noProxyUrlRegexCaseSensitiveCheckBox.checked) { // ignore case
+        optionSettings.noProxyUrlRegexFlg = optionSettings.noProxyUrlRegexFlg + "i";// add i flag
+    }
+    console.log("changed Handler noProxyUrlRegexFlg[" + optionSettings.noProxyUrlRegexFlg + "]");
+    storeInputToStorage();
+}
+
+function noProxyUrlRegexTextFieldChangeHandler() {
+        optionSettings.noProxyUrlRegexString = noProxyUrlRegexTextField.value;
+        console.log(
+            "changed Handler noProxyUrlRegexString:"
+             + optionSettings.noProxyUrlRegexString);
+        storeInputToStorage();
 }
 
 function storeInputToStorage() {
     // setting checkboxes with default value in HTML 
-    exceptAllNoProxy.checked = exceptAllNoProxyCheckBox.checked;
-    exceptNoProxyMedia.checked = exceptNoProxyMediaCheckBox.checked;
+    optionSettings.exceptAllNoProxy.checked = exceptAllNoProxyCheckBox.checked;
+    optionSettings.exceptNoProxyMedia.checked = exceptNoProxyMediaCheckBox.checked;
     // store input value to the Storage.
-    storeArgsToStorage(scanTargetHosts,
-        noProxyHosts,
-        noProxyHostsPartial,
-        proxyHost,
-        proxyPort,
-        exceptAllNoProxy,
-        noProxyMedia,
-        exceptNoProxyMedia);
-}
-
-function storeArgsToStorage(scanTargetHosts,
-    noProxyHosts,
-    noProxyHostsPartial,
-    proxyHost,
-    proxyPort,
-    exceptAllNoProxy,
-    noProxyMedia,
-    exceptNoProxyMedia) {
-    let exceptAllNoProxyString = JSON.stringify(exceptAllNoProxy);
-    let exceptNoProxyMediaString = JSON.stringify(exceptNoProxyMedia);
-    browser.storage.local.set({
-        scanTargetHosts: scanTargetHosts,
-        noProxyHosts: noProxyHosts,
-        noProxyHostsPartial: noProxyHostsPartial,
-        proxyHost: proxyHost,
-        proxyPort: proxyPort,
-        exceptAllNoProxy: exceptAllNoProxyString,
-        noProxyMedia: noProxyMedia,
-        exceptNoProxyMedia: exceptNoProxyMediaString
-    }).then(() =>{
-        console.log("saved option settings to local storage");
-    },onError);
+    storeObjectToStorage(optionSettings)
 }
 
 
+
+/**
+
+get the type of specified argument.
+
+Object.prototype.toString.call(a) returns:
+
+string	"", "abc", 'a', String(1)	string	[object String]
+String	new String("")	object	[object String]
+number	0, NaN, Infinity, Number('1')	number	[object Number]
+Number	new Number(0)	object	[object Number]
+bigint	1n, BigInt(1)	bigint	[object BigInt]
+Bigint	Object(1n)	object	[object BigInt]
+boolean	true, Boolean(0)	boolean	[object Boolean]
+Boolean	new Boolean(true)	object	[object Boolean]
+symbol	Symbol(1)	symbol	[object Symbol]
+Symbol	Object(Symbol(1))	object	[object Symbol]
+null	null	object	[object Null]
+undefined	undefined	undefined	[object Undefined]
+array	[]	object	[object Array]
+object	{}	object	[object Object]
+function	() => {}	function	[object Function]
+Map	new Map()	object	[object Map]
+Set	new Set()	object	[object Set]
+Date	new Date()	object	[object Date]
+Error	new Error()	object	[object Error]
+
+**/
+function getType(a) {
+  return Object.prototype.toString.call(a).replace('[object ', '').replace(']', '');
+}
+
+function storeObjectToStorage(dataObject) {
+    let storageObject = {};
+    for (const [key, value] of Object.entries(dataObject)) {
+        let valueData = value;
+        storageObject[key] = valueData;
+    }
+    browser.storage.local.set(storageObject).then(
+        ()=>{
+            console.log("saved option settings to local storage");
+        },
+    onError);
+}
 
 
 // Update the options UI with the settings values retrieved from storage
 function updateUI(restoredSettings) {
+
+    console.log("update UI started.");
+    // restore values to optionSettings from storage
+    for (const [key, value] of Object.entries(restoredSettings)) {
+        optionSettings[key] = value;
+    }
+
+    // restore values to UI from storage
     scanTargetHostsTextArea.value = restoredSettings.scanTargetHosts.join("\n");
     noProxyHostsTextArea.value = restoredSettings.noProxyHosts.join("\n") + "\n" + restoredSettings.noProxyHostsPartial.join("\n");
     proxyHostTextField.value = restoredSettings.proxyHost;
     proxyPortTextField.value = restoredSettings.proxyPort;
-    exceptAllNoProxy = JSON.parse(restoredSettings.exceptAllNoProxy);
-    exceptAllNoProxyCheckBox.checked = exceptAllNoProxy.checked;
-    scanTargetHosts = restoredSettings.scanTargetHosts;
-    noProxyHosts = restoredSettings.noProxyHosts;
-    noProxyHostsPartial = restoredSettings.noProxyHostsPartial;
-    proxyHost = restoredSettings.proxyHost;
-    proxyPort = restoredSettings.proxyPort;
     noProxyMediaTextArea.value = restoredSettings.noProxyMedia.join("\n");
-    noProxyMedia = restoredSettings.noProxyMedia;
-    exceptNoProxyMedia = JSON.parse(restoredSettings.exceptNoProxyMedia);
-    exceptNoProxyMediaCheckBox.checked = exceptNoProxyMedia.checked;
-
+    exceptAllNoProxyCheckBox.checked = optionSettings.exceptAllNoProxy.checked;
+    exceptNoProxyMediaCheckBox.checked = optionSettings.exceptNoProxyMedia.checked;
+    noProxyUrlRegexTextField.value = restoredSettings.noProxyUrlRegexString;
+    if (optionSettings.noProxyUrlRegexFlg.indexOf("i") > -1){
+        noProxyUrlRegexCaseSensitiveCheckBox.checked = false;
+    } else {
+        noProxyUrlRegexCaseSensitiveCheckBox.checked = true;
+    }
 }
 
-function onError(e) {
-  console.error(e);
+function handleResponse(message) {
+    if (!message.error) {
+        console.log(`Message from the background script: ${message.response}`);
+        browser.storage.local.get().then(updateUI, onError);
+    } else {
+        console.log("Message from the background script: " + message.response);
+    }
 }
 
-// On opening the options page, fetch stored settings and update the UI with them.
-browser.storage.local.get().then(updateUI, onError);
 
-// Whenever the contents of the textarea/textfield changes, save the new values
-scanTargetHostsTextArea.addEventListener("change", scanTargetHostsTextAreaChangeHandler);
-noProxyHostsTextArea.addEventListener("change", noProxyHostsTextAreaChangeHandler);
-proxyHostTextField.addEventListener("change", proxyHostTextFieldChangeHandler);
-proxyPortTextField.addEventListener("change", proxyPortTextFieldChangeHandler);
-exceptAllNoProxyCheckBox.addEventListener("change", exceptAllNoProxyCheckBoxChangeHandler);
-noProxyMediaTextArea.addEventListener("change", noProxyMediaTextAreaChangeHandler);
-exceptNoProxyMediaCheckBox.addEventListener("change", exceptNoProxyMediaCheckBoxChangeHandler);
+function handleFiles() {
+  const fileList = this.files;
+  const firstFile = fileList[0];
+  console.log("importListener readAstext file[" + firstFile.name + "]");
+  fileReader.readAsText(firstFile);
+}
 
 // warning: you can't use checking key is null or undefined. this makes JSON.stringify return undefined.
 // and you must carefully check string data with using !==/=== for String, ==/!= null check.
@@ -241,11 +241,15 @@ function parseStringify(key, value) {
                 console.log("  item[" + item + "]");
             });
         } else {
-            console.log("value is unknown");
+            console.log("value is [" + getType(value) + "]");
         }
     }
     return value;
- }
+}
+
+function onError(e) {
+  console.log(`Error: ${e}`);
+}
 
 const storageImEx = {
     parseStorageData: (newStorage) => {
@@ -254,18 +258,22 @@ const storageImEx = {
           if (typeof(key) === 'string' && key !== "") {
             console.log("key[" + key + "]");
             if (typeof(value) === 'string' || typeof(value) === "number") {
-                    console.log("prepareImport key=" + key + " value=" + value);
-                    mapData.set(key, value);
+                console.log("prepareImport key=" + key + " value=" + value);
+                mapData.set(key, value);
             } else if (Array.isArray(value)) {
                 value.forEach(item => {
                     console.log("item[" + item + "]");
                 });
                 mapData.set(key, value);
+            } else if (getType(value) === 'Object' ){
+                console.log("value is [" + getType(value) + "]");
+                mapData.set(key, value);
+            } else {
+                console.log("value is not our member type. ignored.");
             }
           } else {
               console.log("key data is not string or blank. ignored.");
           }
-
         }
         if (mapData.size > 0) {
             let returnObject = Object.fromEntries(mapData);
@@ -319,9 +327,24 @@ const storageImEx = {
 
 
     onError: (e) => {
-        console.log(e.message);
+        console.log(`Error: ${e}`);
     },
 }
+
+console.log("start options...");
+// On opening the options page, fetch stored settings and update the UI with them.
+browser.storage.local.get().then(updateUI, onError);
+
+// Whenever the contents of the textarea/textfield changes, save the new values
+scanTargetHostsTextArea.addEventListener("change", scanTargetHostsTextAreaChangeHandler);
+noProxyHostsTextArea.addEventListener("change", noProxyHostsTextAreaChangeHandler);
+proxyHostTextField.addEventListener("change", proxyHostTextFieldChangeHandler);
+proxyPortTextField.addEventListener("change", proxyPortTextFieldChangeHandler);
+exceptAllNoProxyCheckBox.addEventListener("change", exceptAllNoProxyCheckBoxChangeHandler);
+noProxyMediaTextArea.addEventListener("change", noProxyMediaTextAreaChangeHandler);
+exceptNoProxyMediaCheckBox.addEventListener("change", exceptNoProxyMediaCheckBoxChangeHandler);
+noProxyUrlRegexTextField.addEventListener("change", noProxyUrlRegexTextFieldChangeHandler);
+noProxyUrlRegexCaseSensitiveCheckBox.addEventListener("change", noProxyUrlRegexCaseSensitiveCheckBoxChangeHandler);
 
 //export watch
 if (document.getElementById("exportStorage")) {
@@ -336,20 +359,10 @@ fileReader.onload = function (event) {
 };
 
 
-function handleFiles() {
-  const fileList = this.files;
-  const firstFile = fileList[0];
-  console.log("importListener readAstext file[" + firstFile.name + "]");
-  fileReader.readAsText(firstFile);
-}
-
-
 const localStorageFileInputTag = document.querySelector("#importStorage");
 if (localStorageFileInputTag !== null) {
     try {
-
         localStorageFileInputTag.addEventListener("change", handleFiles, false);
-
     } catch (e) {
         console.log("importStorage error: " + e.message);
     }
@@ -359,19 +372,12 @@ if (localStorageFileInputTag !== null) {
 const resetDefaultButtonTag = document.querySelector("#resetDefault");
 if (resetDefaultButtonTag != null) {
     resetDefaultButtonTag.addEventListener("click", () => {
-    browser.storage.local.clear().then(() => {
-        console.log("storage cleared.");
-        storeArgsToStorage(restoreScanTargetHosts,
-                                       restoreNoProxyHosts,
-                                       restoreNoProxyHostsPartial,
-                                       restoreProxyHost,
-                                       restoreProxyPort,
-                                       restoreExceptAllNoProxy,
-                                       restoreNoProxyMedia,
-                                       restoreExceptNoProxyMedia)
-        browser.storage.local.get().then(updateUI, onError);
-    }, onError);
-
-
+        browser.storage.local.clear().then(() => {
+            console.log("storage cleared.");
+            const sending = browser.runtime.sendMessage({
+                order: "reset",
+              });
+              sending.then(handleResponse, onError);
+        }, onError);
     });
 }
