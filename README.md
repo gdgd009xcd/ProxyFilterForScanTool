@@ -18,7 +18,7 @@ you may encounter problems which may not work as you think. This addon's main us
 
 1. clone this repository into your favorite directory.<br>
 e.g.: git clone https://github.com/gdgd009xcd/ProxyFilterForScanTool.git
-1. access [debugging mode](about:debugging#/runtime/this-firefox) in firefox browser
+1. type "about:debugging#/runtime/this-firefox" in the address bar of your firefox browser and press Enter.
 2. click Load temporariry Add-on... button, and select this addon's manifest.json file.<br>
 manifest.json file is exist under ProxyFilterForScanTool folder.
 
