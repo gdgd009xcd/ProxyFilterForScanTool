@@ -17,9 +17,15 @@ you may encounter problems which may not work as you think. This addon's main us
 ### install  temporaliry in development mode
 
 1. clone this repository into your favorite directory.<br>
-e.g.: git clone https://github.com/gdgd009xcd/ProxyFilterForScanTool.git
-1. type "about:debugging#/runtime/this-firefox" in the address bar of your firefox browser and press Enter.
-2. click Load temporariry Add-on... button, and select this addon's manifest.json file.<br>
+e.g.: 
+
+       git clone https://github.com/gdgd009xcd/ProxyFilterForScanTool.git
+
+2. copy below string and paste it to the address bar of your firefox browser and press Enter.
+
+       about:debugging#/runtime/this-firefox
+
+3. click Load temporariry Add-on... button, and select this addon's manifest.json file.<br>
 manifest.json file is exist under ProxyFilterForScanTool folder.
 
 ### install as addon
