@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "name": "ProxyFilterForScanTool",
   "description": "Filter web requests to access via proxy",
-  "version": "0.96",
+  "version": "0.97",
 
   "icons": {
     "48": "icons/proxyfilter.svg",
