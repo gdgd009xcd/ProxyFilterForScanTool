@@ -30,7 +30,14 @@ manifest.json file is exist under ProxyFilterForScanTool folder.
 
 ### install as addon
 
-In preparation..
+1. go to [releases page](https://github.com/gdgd009xcd/ProxyFilterForScanTool/releases),<br>
+   download proxyfilterforscantool-nn.nn.xpi file in Assets.
+2. start firefox and copy following string and paste address bar in your firefox and press enter.
+
+       about:addons
+
+3. click Manage Extensions icon and select install addon from file..
+4. select proxyfilterforscantool-nn.nn.xpi file.
 
 ### how to configure
 
