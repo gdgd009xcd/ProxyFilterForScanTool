@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "{4beac47e-5ae6-4017-a3ba-925561d6b353}": {
+      "updates": [
+        {
+          "version": "0.97",
+          "update_link": "https://github.com/gdgd009xcd/ProxyFilterForScanTool/releases/download/v0.96/proxyfilterforscantool-0.97.xpi"
+        }
+      ]
+    }
+  }
+}
