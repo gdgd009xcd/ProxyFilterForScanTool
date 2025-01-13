@@ -63,7 +63,9 @@ and click [...] and select preference menu item.
     if request's primeheader matches this regex, then request will be send host directly.<br>
     The primeHeader consists of HttpMethod and URL<br>
     HttpMethod:POST/GET/PUT/HEAD ...etc.<br>
-    Regex example: POST http://somewhere.com.*
+    Regex example:<br>
+  
+          POST http://arbitary-somewhere-domain.com.*
 
 * Option Settings Management
   * Import option settings from file:
@@ -74,5 +76,6 @@ and click [...] and select preference menu item.
     if you want to reset option settings to default, you can click this button.
 
 ### how to see what this addon is doing
-you can see this addon's console.log by typing Ctrl + Shift + J for opening console log 
+you can see this addon's console.log by typing Ctrl + Shift + J for opening console log.<br>
+select Multiprocess(Slower) to display the log of this addon.
 

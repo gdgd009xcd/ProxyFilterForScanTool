@@ -38,17 +38,48 @@ const defaultOptionSettings = {
         checked: false
     },
 
-    noProxyUrlRegexp: null,
+
     noProxyUrlRegexString: "",
     noProxyUrlRegexFlg: "ig",
 
-
+    // those property are not save to storage.
+    noProxyUrlRegexp: null,
 
 };
 
 // current option settings
 let optionSettings = {};
 
+function parseStorageData(newStorage)  {
+    let mapData = new Map();
+    for (const [key, value] of Object.entries(newStorage)) {
+      if (typeof(key) === 'string' && key !== "") {
+        //console.log("key[" + key + "]");
+        if (typeof(value) === 'string' || typeof(value) === "number") {
+            //console.log("prepareImport key=" + key + " value=" + value);
+            mapData.set(key, value);
+        } else if (Array.isArray(value)) {
+            value.forEach(item => {
+                //console.log("item[" + item + "]");
+            });
+            mapData.set(key, value);
+        } else if (getType(value) === 'Object' ){
+            //console.log("value is [" + getType(value) + "]");
+            mapData.set(key, value);
+        } else {
+            //console.log("value is not our member type. ignored.");
+        }
+      } else {
+          //console.log("key data is not string or blank. ignored.");
+      }
+    }
+    if (mapData.size > 0) {
+        let returnObject = Object.fromEntries(mapData);
+        return returnObject;
+    }
+    //console.log("load data is empty.");
+    return null;
+}
 
 function newInstanceObject(srcObject) {
   let newSettings = {};
@@ -69,51 +100,71 @@ function storeObjectToStorage(dataObject) {
         storageObject[key] = valueData;
     }
     return browser.storage.local.set(storageObject).then(() => {
-        console.log("storeObjectToStorage setting is done.");
     });
 }
 
 function onGot(item) {
     console.log("proxy handler start onGot..");
     let isStorageExist = false;
-    if (item.proxyHost) {
+    let optionCounter = 0;
+
+    if (getType(item.proxyHost) !== 'Undefined') {
         optionSettings.proxyHost = item.proxyHost;
+        optionCounter++;
     }
-    if (item.proxyPort) {
+    if (getType(item.proxyPort) !== 'Undefined') {
         optionSettings.proxyPort = item.proxyPort;
+        optionCounter++;
     }
-    if (item.scanTargetHosts) {
-        isStorageExist = true;
+    if (getType(item.scanTargetHosts) !== 'Undefined') {
         optionSettings.scanTargetHosts = item.scanTargetHosts;
-        console.log("loaded scanTargetHosts from localStorage");
-    } else {
-        console.log("Initialize scanTargetHosts to default.");
+        optionCounter++;
     }
-    if (item.noProxyHosts) {
+    if (getType(item.noProxyHosts) !== 'Undefined') {
         optionSettings.noProxyHosts = item.noProxyHosts;
+        optionCounter++;
     }
-    if (item.noProxyHostsPartial) {
+    if (getType(item.noProxyHostsPartial) !== 'Undefined') {
         optionSettings.noProxyHostsPartial = item.noProxyHostsPartial;
+        optionCounter++;
     }
-    if (item.noProxyMedia) {
+    if (getType(item.noProxyMedia) !== 'Undefined') {
         optionSettings.noProxyMedia = item.noProxyMedia;
+        optionCounter++;
     }
 
-    if (item.exceptAllNoProxy) {
+    if (getType(item.exceptAllNoProxy) !== 'Undefined') {
         optionSettings.exceptAllNoProxy = item.exceptAllNoProxy;
+        optionCounter++;
     }
 
-    if (item.exceptNoProxyMedia) {
+    if (getType(item.exceptNoProxyMedia) !== 'Undefined') {
         optionSettings.exceptNoProxyMedia = item.exceptNoProxyMedia;
+        optionCounter++;
     }
 
-    if (item.noProxyUrlRegexString) {
+    if (getType(item.noProxyUrlRegexString) !== 'Undefined') {
         optionSettings.noProxyUrlRegexString = item.noProxyUrlRegexString;
+        optionCounter++;
     }
 
-    if (item.noProxyUrlRegexFlg){
+    if (getType(item.noProxyUrlRegexFlg) !== 'Undefined'){
         optionSettings.noProxyUrlRegexFlg = item.noProxyUrlRegexFlg;
-        console.log("onGot noProxyUrlRegexFlg[" + optionSettings.noProxyUrlRegexFlg + "]");
+        optionCounter++;
+        //console.log("onGot noProxyUrlRegexFlg[" + optionSettings.noProxyUrlRegexFlg + "]");
+    }
+
+    let messageString = "localStorage was initialized with defaultOptionSettings.";
+    if (optionCounter >= defaultOptionSettingsItemCount) {
+        isStorageExist = true;
+        messageString = "optionSettings was loaded from localStorage.";
+    } else if (optionCounter > 0) {
+        messageString = "count of loaded items from localStorage :"
+                    + optionCounter
+                    + "\n"
+                    + "count of initialized items to localStorage:"
+                    + (defaultOptionSettingsItemCount - optionCounter);
+
     }
 
     if (optionSettings.noProxyUrlRegexString != null
@@ -125,18 +176,28 @@ function onGot(item) {
         optionSettings.noProxyUrlRegexp = defaultOptionSettings.noProxyUrlRegexp
     }
 
-    let messagestring = "Initialize scanTargetHosts to default.";
-    if (isStorageExist) {
-      messagestring = "loaded scanTargetHosts from localStorage";
-    }
-    browser.notifications.create('onInstalled', {
-        title: 'onInstalled event',
-        message: messagestring,
-        type: 'basic'
-      });
+    return Promise.resolve({isStorageExist: isStorageExist, message: messageString});
+}
 
-    storeObjectToStorage(optionSettings);
-    console.log("proxy handler end onGot..");
+function sendNotification(messagestring) {
+    browser.notifications.create('onInstalled', {
+            title: 'onInstalled event',
+            message: messagestring,
+            type: 'basic'
+    });
+    return messagestring;
+}
+
+function postInstallTask(result) {
+    let messagestring = result.message;
+    if (!result.isStorageExist) {
+        return storeObjectToStorage(optionSettings).then(() =>{
+            return sendNotification(messagestring);
+        });
+    }
+    return Promise.resolve(messagestring).then((messagestring) =>{
+        return sendNotification(messagestring);
+    });
 }
 
 function isNoProxyHost(hostname) {
@@ -226,7 +287,9 @@ function handleProxyRequest(requestInfo) {
 // return Promise
 function resetOptionSettings () {
     optionSettings = newInstanceObject(defaultOptionSettings);
-    return storeObjectToStorage(optionSettings);
+    return storeObjectToStorage(optionSettings).then(() =>{
+        return "localStorage was initialized with defaultOptionSettings.";
+    });
 }
 
 /**
@@ -268,10 +331,10 @@ function handleMessage(request, sender, sendResponse) {
     if (request.order === "reset") {
         // response returns promise.
         return resetOptionSettings().then(
-            () => {
+            (result) => {
                 console.log("resetOptionSettings.. now send response.");
                 return {
-                    response :"reset OptionSettings is completed.",
+                    response :"reset OptionSettings :[" + result + "]",
                     error: false
                 };
             }
@@ -302,20 +365,38 @@ function onError(error) {
 }
 
 // main routine
-// Set the default list on installation.
 
+// Set the default list on installation.
 // initialize OptionSetting to defaults
 optionSettings = newInstanceObject(defaultOptionSettings);
+
+const defaultOptionSettingsItemCount = Object.keys(parseStorageData(defaultOptionSettings)).length;
+console.log("defaultOptionSettingsItemCount=" + defaultOptionSettingsItemCount);
 
 // receive message from option UI and then take actions for ordering.
 // after all actions is completed, it returns response message to optionUI.
 browser.runtime.onMessage.addListener(handleMessage);
 
 browser.runtime.onInstalled.addListener(details => {
-    console.log("start proxy handler on Install..." + details.reason);
+    console.log("start proxy handler on " + details.reason);
     let storedData = browser.storage.local.get();
-    storedData.then(onGot, onError);
+    storedData.then((item) => {
+        onGot(item).then((result) => {
+            postInstallTask(result).then((message) =>{
+                console.log("Completed post Install task :" + message);
+            });
+        });
+    }).catch(onError);
 });
+
+// You cannot set property of persisitent in manifest v3. it always applies persistent:false
+// so this storage.get method is called multiple times while this addon is running.
+let storedData = browser.storage.local.get();
+storedData.then((item) => {
+    onGot(item).then((result) => {
+        console.log("onGot result:" + result.message);
+    });
+}).catch(onError);
 
 // Listen for changes in the stored items
 browser.storage.onChanged.addListener(changeData => {
